@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+</head>
+<body ng-app="app">
+<section>
+    <div id="wrapper" off-canvas-menu></div>
+</section>
+<script>
+    (function() {
+        angular.module("app", []);
+        angular.module("app")
+                .service('LoadMenuService', function ($http) {
+                    return {
+                        get: function () {
+                            return $http.get('menuItems.json');
+                        }
+                    }
+                })
+                .directive("offCanvasMenu", offCanvasMenu);
+
+        function offCanvasMenu() {
+            return {
+                restrict: 'A',
+                replace: false,
+                scope: true,
+                controllerAs: 'menu',
+                controller: function (LoadMenuService) {
+                    var vm = this;
+                    vm.isMenuOpen = false;
+                    vm.toggleMenu = toggleMenu;
+
+                    getMenuItems();
+
+                    function getMenuItems() {
+                        LoadMenuService.get().then(function (response) {
+                            vm.menuItems = response.data;
+                            return vm.menuItems;
+                        });
+                    }
+
+                    function toggleMenu() {
+                        vm.isMenuOpen = !vm.isMenuOpen;
+                    }
+                },
+                link: function ($scope, $element, $attrs) {
+                },
+                template: '<div id="menu" ng-class="{visible:menu.isMenuOpen}">' +
+                '<h2>Menu</h2>' +
+                '<ul ng-repeat="item in menu.menuItems">' +
+                '<li>{{item}}</li>' +
+                '</ul>' +
+                '<span id="close-menu" ng-click="menu.toggleMenu()">' +
+                '<i class="fa fa-times" aria-hidden="true"></i>' +
+                '</span>' +
+                '</div>' +
+                '<button ng-click="menu.toggleMenu()">' +
+                '<i class="fa fa-bars" aria-hidden="true"></i>' +
+                '</button>'
+            };
+        }
+    })();
+</script>
+</body>
+</html>
